@@ -5,177 +5,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
-  <style>
-    #canvas-wrapper {
-      width: 1200px;
-      height: 800px;
-      position: relative;
-      margin: 20px auto;
-    }
-
-    #canvas {
-      border: 1px solid #aaa;
-    }
-
-    #controller {
-      position: absolute;
-      top: 30px;
-      left: 30px;
-      background-color: rgba(0, 85, 116, 0.7);
-      padding: 5px 20px 25px 20px;
-      border-radius: 10px 10px;
-    }
-
-    #controller h1 {
-      color: white;
-      font-weight: bold;
-      font-family: Microsoft Yahei;
-    }
-
-    #controller #canvas-btn {
-      display: inline-block;
-      background-color: #8b0;
-      color: white;
-      font-size: 14px;
-      padding: 5px 15px;
-      border-radius: 6px;
-      text-decoration: none;
-      margin-top: 10px;
-      margin-right: 20px;
-    }
-
-    #controller #canvas-btn:hover {
-      background-color: #7a0;
-    }
-
-    #controller .color-btn {
-      display: inline-block;
-      font-size: 14px;
-      padding: 5px 15px;
-      border-radius: 6px;
-      text-decoration: none;
-      margin-top: 10px;
-      margin-right: 5px;
-    }
-
-    #white-color-btn {
-      background: white;
-    }
-
-    #black-color-btn {
-      background: black;
-    }
-  </style>
 </head>
 
 <body>
-  <div id="canvas-wrapper">
-    <canvas id="canvas"></canvas>
-    <div id="controller">
-      <h1>Canvas 绘图之旅</h1>
-      <a href="#" id="canvas-btn">停止运动</a>
-      <a href="#" class="color-btn" id="white-color-btn">&nbsp;</a>
-      <a href="#" class="color-btn" id="black-color-btn">&nbsp;</a>
-    </div>
-  </div>
+  <canvas id="canvas" style="border: 1px solid #aaa;display:block;margin: 20px auto;"></canvas>
   
   <script>
+    CanvasRenderingContext2D.prototype.fillStar = function(r, R, x, y, rot) {
+      this.beginPath()
+      for (let i = 0; i < 5; i++) {
+        this.lineTo(
+          Math.cos((18 + i * 72 - rot) / 180 * Math.PI) * R + x,
+          -Math.sin((18 + i * 72 - rot) / 180 * Math.PI) * R + y
+        )
+        this.lineTo(
+          Math.cos((54 + i * 72 - rot) / 180 * Math.PI) * r + x,
+          -Math.sin((54 + i * 72 - rot) / 180 * Math.PI) * r + y
+        )
+      }
+      this.closePath()
+      this.fill()
+    }
+
     const canvas = document.getElementById('canvas')
-    canvas.width = 1200
+    canvas.width = 800
     canvas.height = 800
     const context = canvas.getContext('2d')
 
-    const balls = []
-    let isMoving = true
-    let themeColor = 'white'
-    for(let i = 0; i < 100; i++) {
-      const R = Math.floor(Math.random() * 255)
-      const G = Math.floor(Math.random() * 255)
-      const B = Math.floor(Math.random() * 255)
-      const radius = Math.random() * 50 + 20
-
-      const ball = {
-        color: `rgb(${R}, ${G}, ${B})`,
-        radius,
-        x: Math.random() * (canvas.width - 2*radius) + radius,
-        y: Math.random() * (canvas.height - 2*radius) + radius,
-        vx: (Math.random() * 5 + 5) * Math.pow(-1, Math.floor(Math.random()*100)),
-        vy: (Math.random() * 5 + 5) * Math.pow(-1, Math.floor(Math.random() * 100)),
-      }
-
-      balls[i] = ball
-    }
-
-    setInterval(function() {
-      draw(context)
-      if(isMoving) {
-        update(canvas.width, canvas.height)
-      }
-    }, 50)
-
-    document.getElementById('canvas-btn').onclick = function() {
-      if (isMoving) {
-        isMoving = false
-        this.text = '开始运动'
-      } else {
-        isMoving = true
-        this.text = '停止运动'
-      }
-    }
-
-    document.getElementById('white-color-btn').onclick = function() {
-      themeColor = 'white'
-      return false
-    }
-
-    document.getElementById('black-color-btn').onclick = function () {
-      themeColor = 'black'
-      return false
-    }
-
-    function draw(cxt) {
-      cxt.clearRect(0, 0, cxt.canvas.width, cxt.canvas.height)
-
-      if (themeColor === 'black') {
-        cxt.fillStyle = 'black'
-        cxt.fillRect(0, 0, cxt.canvas.width, cxt.canvas.height)
-      }
-      for(let i = 0; i < balls.length; i++) {
-        cxt.fillStyle = balls[i].color
-        cxt.beginPath()
-        cxt.arc(balls[i].x, balls[i].y, balls[i].radius, 0, Math.PI*2)
-        cxt.closePath()
-        cxt.fill()
-      }
-    }
-
-    function update(canvasWidth, canvasHeight) {
-      for (let i = 0; i < balls.length; i++) {
-        balls[i].x += balls[i].vx
-        balls[i].y += balls[i].vy
-
-        if (balls[i].x - balls[i].radius <= 0) {
-          balls[i].vx = -balls[i].vx
-          balls[i].x = balls[i].radius
-        }
-
-        if (balls[i].x + balls[i].radius >= canvasWidth) {
-          balls[i].vx = -balls[i].vx
-          balls[i].x = canvasWidth - balls[i].radius
-        }
-
-        if (balls[i].y - balls[i].radius <= 0) {
-          balls[i].vy = -balls[i].vy
-          balls[i].y = balls[i].radius
-        }
-
-        if (balls[i].y - balls[i].radius >= canvasHeight) {
-          balls[i].vy = -balls[i].vy
-          balls[i].y = canvasHeight - balls[i].radius
-        }
-      }
-    }
-
+    context.fillStyle = '#058'
+    context.fillStar(150, 300, 400, 400, 0)
     
   </script>
 </body>
